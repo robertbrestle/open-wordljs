@@ -1,0 +1,109 @@
+html, body {
+	font-family: "Lucida Console", Courier, monospace;
+	font-size: 16px;
+}
+
+.tile {
+	font-size: 2rem;
+	font-weight: bold;
+	line-height: 2rem;
+	vertical-align: middle;
+	text-transform: uppercase;
+	align-items: center;
+	justify-content: center;
+	display: inline-flex;
+	padding: .5rem;
+}
+#keyboard .tile.green,
+.tile.green {
+	background-color: #6aaa64;
+	/*background-color: #538d4e;*/
+	color: white;
+}
+#keyboard .tile.yellow,
+.tile.yellow {
+	background-color: #c9b458;
+	/*background-color: #b59f3b;*/
+	color: white;
+}
+#keyboard .tile.gray,
+.tile.gray {
+	background-color: #86888a;
+	/*background-color: #939598;*/
+	color: white;
+}
+
+/* GAMEBOARD */
+.board {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+}
+.board > div {
+	display: flex;
+	justify-content: center;
+}
+.board .tile {
+	border: solid 2px black;
+	width: 3rem;
+	height: 3rem;
+	margin: .2rem;
+}
+.board .tile.green,
+.board .tile.yellow,
+.board .tile.gray {
+	color: white;
+}
+/* KEYBOARD */
+#keyboard .tile {
+	border: 1px solid black;
+	border-radius: 5px;
+	margin: 2px;
+	/* disable double-tap to zoom */
+	-ms-touch-action: manipulation;
+	touch-action: manipulation;
+	/* reverse this? */
+	color: black;
+	background-color: white;
+}
+#keyboard .tile:active,
+#keyboard .tile:focus,
+#keyboard .tile:hover {
+	opacity: .8;
+}
+
+@media (prefers-color-scheme:dark) {
+	html, body {
+		background-color: #121212;
+		color: white;
+	}
+	a, a:visited {
+		color: cyan;
+	}
+	a:active,a:focus,a:hover {
+		color: white;
+	}
+	.dropdown-menu {
+		background-color: black;
+		color: white;
+	}
+	.dropdown-item {
+		color: white;
+	}
+
+	.board .tile {
+		border: solid 2px white;
+	}
+
+	/* bootstrap */
+	.alert-danger a,
+	.alert-success a {
+		color: black;
+	}
+}
+
+@media (max-width: 420px) {
+	.tile {
+		padding: 0.3rem;
+	}
+}
