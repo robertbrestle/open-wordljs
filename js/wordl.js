@@ -3,7 +3,7 @@ WordlJS = {
     currentRow: 1,
     maxRowTiles: 5,
     numGuesses: 6,
-    difficulty: "easy",
+    difficulty: "easy", // easy, hard, girl6
     init:function() {
         var keyboardKeys = document.querySelectorAll("#keyboard .tile");
         keyboardKeys.forEach(function(k) {
@@ -11,11 +11,6 @@ WordlJS = {
                 k.addEventListener("mousedown", function(e) {
                     WordlJS.clickKey(k.dataset.action);
                 });
-                /*
-                k.addEventListener("dblclick", function(e) {
-                    e.preventDefault();
-                });
-                */
             }
         });
         // register keyboard
@@ -41,8 +36,13 @@ WordlJS = {
                 rowTiles.forEach(function(t) {
                     guess += t.textContent.toLowerCase();
                 });
-                if(/^[a-z]{5}$/.test(guess) && guess.length == WordlJS.maxRowTiles) {
-                    WordlJS.validateGuess(guess);
+                // submit, else show error highlighting
+                if(WordlJS.validate(guess)) {
+                    WordlJS.highlight(guess);
+                    WordlJS.submit(guess);
+                }else {
+                    WordlJS.errorHighlight(true);
+                    document.getElementById("gameMessageBad").innerHTML = "Invalid guess";
                 }
             }else if(key == "backspace") {
                 for(let i = rowTiles.length - 1; i >= 0; i--) {
@@ -53,13 +53,29 @@ WordlJS = {
                 }
                 // reset message
                 document.getElementById("gameMessageBad").textContent = "";
+                // remove error highlight
+                WordlJS.errorHighlight(false);
             }else {
                 // add key
+                let guess = "";
+                rowTiles.forEach(function(t) {
+                    guess += t.textContent.toLowerCase();
+                });
+                // if trying to enter more than 5 characters, return
+                if(guess.length == WordlJS.maxRowTiles) {
+                    return;
+                }
+                // append character to the end
                 for(let i = 0; i < rowTiles.length; i++) {
                     if(rowTiles[i].textContent == "") {
                         rowTiles[i].textContent = key;
+                        guess += rowTiles[i].textContent;
                         break;
                     }
+                }
+                // if invalid, show error highlight
+                if(guess.length == WordlJS.maxRowTiles && !WordlJS.validate(guess)) {
+                    WordlJS.errorHighlight(true);
                 }
             }
         }
@@ -71,7 +87,11 @@ WordlJS = {
         }else if (typeof obj === "undefined" || typeof index === "undefined") {
             word = word.toLowerCase();
             // validate against master list
-            obj = treeAll[word[0]];
+            if(WordlJS.difficulty === "girl6") {
+                obj = treeGirl6[word[0]];
+            }else {
+                obj = treeAll[word[0]];
+            }
             index = 0;
         }else {
             obj = obj[word[index]];
@@ -85,16 +105,32 @@ WordlJS = {
         }
     }//checkWord
     ,
-    getHighlight:function(guess) {
+    validate:function(guess) {
+        if(/^[a-z]+$/.test(guess) && guess.length == WordlJS.maxRowTiles && WordlJS.currentRow <= WordlJS.numGuesses) {
+            return WordlJS.checkWord(guess);
+        }
+        return false;
+    }//validate
+    ,
+    highlight:function(guess) {
         let highlight = [];
+        // construct highlight
         if(WordlJS.answer !== "" && typeof guess !== "undefined") {
             let checked = [];
+            let greens = [];
+            // find correct characters first
+            for(var i = 0; i < guess.length; i++) {
+                if(WordlJS.answer[i] === guess[i]) {
+                    greens.push(guess[i]);
+                }
+            }
+            // push highlight
             for(var i = 0; i < guess.length; i++) {
                 if(WordlJS.answer.indexOf(guess[i]) >= 0) {
                     if(WordlJS.answer[i] === guess[i]) {
                         highlight.push({letter:guess[i],color:"green"});
-                        highlight.correct++;
-                    }else if(checked.indexOf(guess[i]) < 0) {
+                    // validate to ensure duplicate characters don't get highlighted yellow
+                    }else if(checked.indexOf(guess[i]) < 0 && greens.indexOf(guess[i]) < 0) {
                         highlight.push({letter:guess[i],color:"yellow"});
                     }else {
                         highlight.push({letter:guess[i],color:"gray"});
@@ -105,41 +141,43 @@ WordlJS = {
                 checked.push(guess[i]);
             }
         }
+        // render highlight
+        if(highlight.length > 0) {
+            let tiles = document.getElementById("gameBoard").querySelectorAll("div[data-row=\"" + WordlJS.currentRow + "\"] .tile");
+            for(let i = 0; i < tiles.length; i++) {
+                tiles[i].className += " " + highlight[i].color;
+                let key = document.querySelector("#keyboard .tile[data-action=\"" + highlight[i].letter + "\"]");
+                //if className is only "tile", append new color
+                if(key.className.length == 4) {
+                    key.className += " " + highlight[i].color;
+                //prioritize green over yellow
+                }else if(key.className.indexOf("yellow") >= 0 && highlight[i].color == "green") {
+                    key.className = "tile green";
+                }
+            }
+        }
         return highlight;
-    }//getHighlight
+    }//highlight
     ,
-    applyHighlight:function(highlight) {
-        if(highlight.length == 0) {
-            return;
-        }
-        let tiles = document.getElementById("gameBoard").querySelectorAll("div[data-row=\"" + WordlJS.currentRow + "\"] .tile");
-        for(let i = 0; i < tiles.length; i++) {
-            tiles[i].className += " " + highlight[i].color;
-            let key = document.querySelector("#keyboard .tile[data-action=\"" + highlight[i].letter + "\"]");
-            //if className is only "tile", append new color
-            if(key.className.length == 4) {
-                key.className += " " + highlight[i].color;
-            //prioritize green over yellow
-            }else if(key.className.indexOf("yellow") >= 0 && highlight[i].color == "green") {
-                key.className = "tile green";
-            }
-        }
-    }//applyHighlight
-    ,
-    validateGuess:function(guess) {
-        if(WordlJS.currentRow <= WordlJS.numGuesses && WordlJS.checkWord(guess)) {
-            let highlight = WordlJS.getHighlight(guess);
-            WordlJS.applyHighlight(highlight);
-            WordlJS.currentRow++;
-            if(guess == WordlJS.answer) {
-                document.getElementById("gameMessageGood").innerHTML = "You win!<br><a href=\"https://duckduckgo.com/?ia=definition&q=define+" + WordlJS.answer + "\" target=\"_blank\">Define: " + WordlJS.answer + "</a>";
-            }else if(WordlJS.currentRow > WordlJS.numGuesses) {
-                document.getElementById("gameMessageBad").innerHTML = "You lose!<br>The correct word was <a href=\"https://duckduckgo.com/?ia=definition&q=define+" + WordlJS.answer + "\" target=\"_blank\">" + WordlJS.answer + "</a>";
-            }
+    errorHighlight:function(enable) {
+        let rowTiles = document.querySelector("#gameBoard > div[data-row=\"" + WordlJS.currentRow + "\"]");
+        if(enable) {
+            rowTiles.classList.add("error");
         }else {
-            document.getElementById("gameMessageBad").innerHTML = "Invalid guess";
+            rowTiles.classList.remove("error");
         }
-    }//validateGuess
+    }//errorHighlight
+    ,
+    submit:function(guess) {
+        // remove error highlight
+        WordlJS.errorHighlight(false);
+        WordlJS.currentRow++;
+        if(guess == WordlJS.answer) {
+            document.getElementById("gameMessageGood").innerHTML = "You win!<br><a href=\"https://duckduckgo.com/?ia=definition&q=define+" + WordlJS.answer + "\" target=\"_blank\">Define: " + WordlJS.answer + "</a>";
+        }else if(WordlJS.currentRow > WordlJS.numGuesses) {
+            document.getElementById("gameMessageBad").innerHTML = "You lose!<br>The correct word was <a href=\"https://duckduckgo.com/?ia=definition&q=define+" + WordlJS.answer + "\" target=\"_blank\">" + WordlJS.answer + "</a>";
+        }
+    }//submit
     ,
     generateAnswer:function(word, obj) {
         if(typeof word === "undefined" || typeof obj === "undefined") {
@@ -151,6 +189,10 @@ WordlJS = {
                 let keys = Object.keys(treeHard);
                 word = keys[Math.floor(Math.random() * keys.length)];
                 obj = treeHard[word];
+            }else if(WordlJS.difficulty == "girl6") {
+                let keys = Object.keys(treeGirl6);
+                word = keys[Math.floor(Math.random() * keys.length)];
+                obj = treeGirl6[word];
             }
             return WordlJS.generateAnswer(word, obj);
         }else if(word.length === WordlJS.maxRowTiles) {
@@ -188,7 +230,19 @@ WordlJS = {
     changeDifficulty:function(level) {
         if(level === "easy" || level === "hard") {
             WordlJS.difficulty = level;
+            WordlJS.maxRowTiles = 5,
+            WordlJS.numGuesses = 6;
             document.getElementById("level").textContent = level;
+            document.getElementById("newWordButton").textContent = "New Word";
+            document.getElementById("gameBoard").innerHTML = document.getElementById("gameBoard5").innerHTML;
+            WordlJS.resetGame();
+        }else if(level === "girl6") {
+            WordlJS.difficulty = level;
+            WordlJS.maxRowTiles = 6,
+            WordlJS.numGuesses = 7;
+            document.getElementById("level").textContent = level;
+            document.getElementById("newWordButton").textContent = "New Name";
+            document.getElementById("gameBoard").innerHTML = document.getElementById("gameBoard6").innerHTML;
             WordlJS.resetGame();
         }
     }//changeDifficulty

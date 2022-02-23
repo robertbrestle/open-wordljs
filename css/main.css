@@ -32,6 +32,10 @@ html, body {
 	/*background-color: #939598;*/
 	color: white;
 }
+.error > div.tile {
+	color: red !important;
+	background-color: inherit !important;
+}
 
 /* GAMEBOARD */
 .board {
