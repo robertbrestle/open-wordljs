@@ -66,8 +66,10 @@
 						<li><a class="dropdown-item" href="#" onclick="Javascript:WordlJS.changeDifficulty('easy')" title="600 common words">easy</a></li>
 						<li><a class="dropdown-item" href="#" onclick="Javascript:WordlJS.changeDifficulty('hard')" title="12400 words - good luck!">hard</a></li>
 						<li><a class="dropdown-item" href="#" onclick="Javascript:WordlJS.changeDifficulty('girl6')" title="6400 6-letter girl names">girl6</a></li>
+						<li><a class="dropdown-item" href="#" onclick="Javascript:WordlJS.changeDifficulty('girl8')" title="3500 8-letter girl names">girl8</a></li>
 					</ul>
 					<button id="newWordButton" class="btn btn-secondary" type="button" onclick="Javascript:WordlJS.resetGame()">New Word</button>
+					<button class="btn btn-success" type="button" onclick="Javascript:WordlJS.end()">Give Up</button>
 				</div>
 				<p><a href="https://github.com/robertbrestle/open-wordljs" target="_blank">View source on GitHub</a></p>
 			</div>
@@ -94,12 +96,24 @@
 	<div data-row="6"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
 	<div data-row="7"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
 </div>
+<div id="gameBoard8" class="d-none">
+	<div data-row="1"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
+	<div data-row="2"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
+	<div data-row="3"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
+	<div data-row="4"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
+	<div data-row="5"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
+	<div data-row="6"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
+	<div data-row="7"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
+	<div data-row="8"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
+	<div data-row="9"><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div></div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="js/tree_all.js"></script>
 <script src="js/tree_hard.js"></script>
 <script src="js/tree_easy.js"></script>
 <script src="js/tree_girl_6.js"></script>
+<script src="js/tree_girl_8.js"></script>
 <script src="js/wordl.js"></script>
 <script type="text/javascript">
 	WordlJS.init();

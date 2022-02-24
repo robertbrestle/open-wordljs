@@ -3,7 +3,7 @@ WordlJS = {
     currentRow: 1,
     maxRowTiles: 5,
     numGuesses: 6,
-    difficulty: "easy", // easy, hard, girl6
+    difficulty: "easy", // easy, hard, girl6, girl8
     init:function() {
         var keyboardKeys = document.querySelectorAll("#keyboard .tile");
         keyboardKeys.forEach(function(k) {
@@ -40,7 +40,7 @@ WordlJS = {
                 if(WordlJS.validate(guess)) {
                     WordlJS.highlight(guess);
                     WordlJS.submit(guess);
-                }else {
+                }else if(guess.length == WordlJS.maxRowTiles) {
                     WordlJS.errorHighlight(true);
                     document.getElementById("gameMessageBad").innerHTML = "Invalid guess";
                 }
@@ -89,6 +89,8 @@ WordlJS = {
             // validate against master list
             if(WordlJS.difficulty === "girl6") {
                 obj = treeGirl6[word[0]];
+            }else if(WordlJS.difficulty === "girl8") {
+                obj = treeGirl8[word[0]];
             }else {
                 obj = treeAll[word[0]];
             }
@@ -147,12 +149,13 @@ WordlJS = {
             for(let i = 0; i < tiles.length; i++) {
                 tiles[i].className += " " + highlight[i].color;
                 let key = document.querySelector("#keyboard .tile[data-action=\"" + highlight[i].letter + "\"]");
-                //if className is only "tile", append new color
-                if(key.className.length == 4) {
-                    key.className += " " + highlight[i].color;
-                //prioritize green over yellow
-                }else if(key.className.indexOf("yellow") >= 0 && highlight[i].color == "green") {
+                // if no classes added
+                if(key.classList.length == 1) {
+                    key.classList.add(highlight[i].color);
+                }else if(highlight[i].color == "green" && !key.classList.contains("green")) {
                     key.className = "tile green";
+                }else if(highlight[i].color == "yellow" && key.classList.contains("gray")) {
+                    key.className = "tile yellow";
                 }
             }
         }
@@ -173,11 +176,25 @@ WordlJS = {
         WordlJS.errorHighlight(false);
         WordlJS.currentRow++;
         if(guess == WordlJS.answer) {
-            document.getElementById("gameMessageGood").innerHTML = "You win!<br><a href=\"https://duckduckgo.com/?ia=definition&q=define+" + WordlJS.answer + "\" target=\"_blank\">Define: " + WordlJS.answer + "</a>";
+            WordlJS.end(true);
         }else if(WordlJS.currentRow > WordlJS.numGuesses) {
-            document.getElementById("gameMessageBad").innerHTML = "You lose!<br>The correct word was <a href=\"https://duckduckgo.com/?ia=definition&q=define+" + WordlJS.answer + "\" target=\"_blank\">" + WordlJS.answer + "</a>";
+            WordlJS.end(false);
         }
     }//submit
+    ,
+    end:function(correct) {
+        // prevent additional guesses
+        WordlJS.currentRow = WordlJS.numGuesses + 1;
+        // reset messages
+        document.getElementById("gameMessageBad").innerHTML = "";
+        document.getElementById("gameMessageGood").innerHTML = "";
+        // display message based on boolean
+        if(correct) {
+            document.getElementById("gameMessageGood").innerHTML = "You win!<br><a href=\"https://duckduckgo.com/?ia=definition&q=define+" + WordlJS.answer + "\" target=\"_blank\">Define: " + WordlJS.answer + "</a>";
+        }else {
+            document.getElementById("gameMessageBad").innerHTML = "You lose!<br>The correct word was <a href=\"https://duckduckgo.com/?ia=definition&q=define+" + WordlJS.answer + "\" target=\"_blank\">" + WordlJS.answer + "</a>";
+        }
+    }//giveUp
     ,
     generateAnswer:function(word, obj) {
         if(typeof word === "undefined" || typeof obj === "undefined") {
@@ -193,6 +210,10 @@ WordlJS = {
                 let keys = Object.keys(treeGirl6);
                 word = keys[Math.floor(Math.random() * keys.length)];
                 obj = treeGirl6[word];
+            }else if(WordlJS.difficulty == "girl8") {
+                let keys = Object.keys(treeGirl8);
+                word = keys[Math.floor(Math.random() * keys.length)];
+                obj = treeGirl8[word];
             }
             return WordlJS.generateAnswer(word, obj);
         }else if(word.length === WordlJS.maxRowTiles) {
@@ -243,6 +264,14 @@ WordlJS = {
             document.getElementById("level").textContent = level;
             document.getElementById("newWordButton").textContent = "New Name";
             document.getElementById("gameBoard").innerHTML = document.getElementById("gameBoard6").innerHTML;
+            WordlJS.resetGame();
+        }else if(level === "girl8") {
+            WordlJS.difficulty = level;
+            WordlJS.maxRowTiles = 8,
+            WordlJS.numGuesses = 9;
+            document.getElementById("level").textContent = level;
+            document.getElementById("newWordButton").textContent = "New Name";
+            document.getElementById("gameBoard").innerHTML = document.getElementById("gameBoard8").innerHTML;
             WordlJS.resetGame();
         }
     }//changeDifficulty
